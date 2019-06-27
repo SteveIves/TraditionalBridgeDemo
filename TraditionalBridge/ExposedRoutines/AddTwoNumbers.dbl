@@ -1,0 +1,9 @@
+
+subroutine AddTwoNumbers
+    number1, n
+    number2, n
+    result, n
+proc
+    result = number1 + number2
+    xreturn
+endsubroutine

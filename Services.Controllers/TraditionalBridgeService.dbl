@@ -1,0 +1,110 @@
+;;*****************************************************************************
+;;
+;; Title:       VmsFunctions.dbl
+;;
+;; Description: This class contains callable wrappers for various OpenVMS routines
+;;              that are being exposed via a REST API (by VmsFunctionsController).
+;;              The code here uses Harmony Core Traditional Bridge to dispatch
+;;              calls to Traditional Synergy routines on OpenVMS via an SSH
+;;              connection and the JSON-RPC protocol.
+;;
+;;              This class is instantiated as a "service" by code in StartupCusom.dbl
+;;              in the Services project and instances are provided to controller
+;;              classes via dependency injection.
+;;
+;;*****************************************************************************
+
+import Harmony.Core
+import Harmony.Core.Context
+import Harmony.Core.Interface
+import Harmony.Core.EF.Extensions
+import Harmony.OData
+import Harmony.OData.Adapter
+import System.Threading.Tasks
+import System
+import System.Collections.Generic
+import System.Text
+import Services
+import Services.Models
+import Microsoft.AspNetCore.Mvc
+import Microsoft.AspNet.OData
+import Microsoft.AspNetCore.Authorization
+import Newtonsoft.Json.Linq
+import System.Linq
+
+namespace Services.Controllers
+
+    ;;; <summary>
+    ;;; Exposes callable wrappers for various UBS Traditional Synergy routines
+    ;;; </summary>
+    public class TraditionalBridgeService extends DynamicCallProvider
+
+        ;;; <summary>
+        ;;; Constructor
+        ;;; </summary>
+        ;;; <param name="connection"></param>
+        public method TraditionalBridgeService
+            connection, @IDynamicCallConnection
+            endparams
+            parent(connection)
+        proc
+
+        endmethod
+
+        ;;Create wrappers for VMS functions
+
+        ;;; <summary>
+        ;;; Add two numbers together
+        ;;; </summary>
+        ;;; <param name="aLogicalName">Logical name to retrieve</param>
+        ;;; <returns>The value of the logical name, or an empty string if the logical name does not exist</returns>
+        public async method AddTwoNumbers, @Task<decimal>
+            required in aNumber1, decimal
+            required in aNumber2, decimal
+        proc
+            data sum, decimal
+            data resultTuple = await CallMethod("AddTwoNumbers",aNumber1,aNumber2,sum)
+            data returnToken = (decimal)(resultTuple.Item2[3]) ;;Item1 = return value, Item2 = array of parameters
+            mreturn returnToken
+        endmethod
+
+        ;;; <summary>
+        ;;; 
+        ;;; </summary>
+        ;;; <returns></returns>
+        public async method GetEnvironment, @Task<string>
+        proc
+            data resultTuple = await CallMethod("GetEnvironment")
+            data returnToken = (@JToken)(resultTuple.Item1) ;Item1 is the return value, a string in this case
+            mreturn returnToken.ToObject<string>()
+        endmethod
+
+        ;;; <summary>
+        ;;; Get the value of a logical name in the Traditional Synergy environment
+        ;;; </summary>
+        ;;; <param name="aLogicalName">Logical name to retrieve</param>
+        ;;; <returns>The value of the logical name, or an empty string if the logical name does not exist</returns>
+        public async method GetLogicalName, @Task<string>
+            required in aLogicalName, string
+        proc
+            data resultTuple = await CallMethod("GetLogicalName",aLogicalName)
+            data returnToken = (@JToken)(resultTuple.Item1) ;Item1 is the return value, a string in this case
+            mreturn returnToken.ToObject<string>()
+        endmethod
+
+        ;;; <summary>
+        ;;; Obtain server-side file spec translations for logical names.
+        ;;; </summary>
+        ;;; <param name="aFileSpecs">Collection of file specs to translate.</param>
+        ;;; <returns>Collection of translated values.</returns>
+        public async method GetFilespecs, @Task<IEnumerable<string>>
+            required in aFileSpecs, @IEnumerable<string>
+        proc
+            data resultTuple = await CallMethod("GetFileSpecs",new Object[#] { aFileSpecs != ^null ? aFileSpecs.ToList() : new List<string>() })
+            ;data returnToken = (@JToken)(resultTuple.Item1)     ;Item1 is the return value. There isn't one in this case!
+            mreturn (@IEnumerable<string>)resultTuple.Item2[1]  ;Item2[1] is the first parameter, ArrayList of strings in this case.
+        endmethod
+
+    endclass
+
+endnamespace

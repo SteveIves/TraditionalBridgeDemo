@@ -1,0 +1,80 @@
+;;*****************************************************************************
+;;
+;; Title:       TraditionalBridgeServiceController.dbl
+;;
+;; Description: This class defines a hand-crafted WebAPI controller that exposes
+;;              various endpoints used to execute OpenVMS routines via the
+;;              Harmony Core Traditional Bridge mechanism.
+;;
+;;*****************************************************************************
+
+import Microsoft.AspNetCore.Mvc
+import System
+import System.Collections.Generic
+import System.Text
+import System.Threading.Tasks
+import Microsoft.AspNetCore.Mvc
+import Services.Models
+import Services.Controllers
+import System.Linq
+import Newtonsoft.Json
+
+namespace Services.Controllers
+
+    {Route("TraditionalBridge")}
+    public class TraditionalBridgeController extends ControllerBase
+
+        ;;Instance of the TraditionalBridgeService service class
+        private _traditionalBridgeService, @TraditionalBridgeService
+
+        ;;; <summary>
+        ;;; Constructor
+        ;;; </summary>
+        ;;; <param name="aTraditionalBridgeServiceService">TraditionalBridgeService instance provided via dependency injection</param>
+        public method TraditionalBridgeController
+            required in aTraditionalBridgeServiceService, @TraditionalBridgeService
+        proc
+            _traditionalBridgeService = aTraditionalBridgeServiceService
+        endmethod
+
+        {Route("AddTwoNumbers/{aNumber1}/{aNumber2}")}
+        ;;; <summary>
+        ;;; Adds two numbers and returns the sum
+        ;;; </summary>
+        ;;; <param name="aLogicalName">Logical name to retrieve</param>
+        ;;; <returns>The value of the logical name, or an empty string if the logical name does not exist</returns>
+        public async method GetAddTwoNumbers, @Task<IActionResult>
+            required in aNumber1, decimal
+            required in aNumber2, decimal
+        proc
+            ;;Call the method
+            mreturn ok(await _traditionalBridgeService.AddTwoNumbers(aNumber1,aNumber2))
+        endmethod
+
+        {Route("GetEnvironment")}
+        ;;; <summary>
+        ;;; Get the current environment data setting
+        ;;; </summary>
+        ;;; <returns></returns>
+        public async method GetEnvironment, @Task<IActionResult>
+        proc
+            ;;Call the method
+            mreturn ok(await _traditionalBridgeService.GetEnvironment())
+        endmethod
+
+        {Route("GetLogicalName/{aLogicalName}")}
+        ;;; <summary>
+        ;;; Get the value of a logical name in the Traditional Synergy environment
+        ;;; </summary>
+        ;;; <param name="aLogicalName">Logical name to retrieve</param>
+        ;;; <returns>The value of the logical name, or an empty string if the logical name does not exist</returns>
+        public async method GetLogicalName, @Task<IActionResult>
+            required in aLogicalName, string
+        proc
+            ;;Call the method
+            mreturn ok(await _traditionalBridgeService.GetLogicalName(aLogicalName))
+        endmethod
+
+    endclass
+
+endnamespace

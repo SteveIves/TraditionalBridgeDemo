@@ -1,0 +1,32 @@
+
+OBJ=./obj
+EXE=./
+export OBJ EXE
+
+. /synergy/1033f/setsde
+
+echo Compiling traditional bridge code...
+
+dbl -W1 -d -o OBJ:TraditionalBridgeHost.dbo \
+ Dispatchers/AddTwoNumbersDispatcher.dbl \
+ Dispatchers/GetEnvironmentDispatcher.dbl \
+ Dispatchers/GetLogicalNameDispatcher.dbl \
+ ExposedRoutines/AddTwoNumbers.dbl \
+ ExposedRoutines/GetEnvironment.dbl \
+ ExposedRoutines/GetLogicalName.dbl \
+ LibraryCode/ArgumentDataDefinition.dbl \
+ LibraryCode/convert.dbl \
+ LibraryCode/DataObjectBase.dbl \
+ LibraryCode/DataObjectMetadataBase.dbl \
+ LibraryCode/FieldDataDefinition.dbl \
+ LibraryCode/json.dbl \
+ LibraryCode/logger.dbl \
+ LibraryCode/RoutineDispatcher.dbl \
+ LibraryCode/Serializer.dbl \
+ LibraryCode/StringDictionary.dbl \
+ RequestDispatcher.dbl \
+ TraditionalBridgeHost.dbl
+
+echo Linking traditional bridge code...
+
+dblink -d -o EXE:TraditionalBridgeHost.dbr OBJ:TraditionalBridgeHost.dbo

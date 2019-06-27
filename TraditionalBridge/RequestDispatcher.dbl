@@ -1,0 +1,26 @@
+
+import Harmony.TraditionalBridge
+import TraditionalBridge.Dispatchers
+
+namespace TraditionalBridge
+
+    ;;; <summary>
+    ;;; Main message dispatcher class. Receives messages over STDIN (TT:),
+    ;;; dispatches (via custom dispatcher classes) to business logic routines,
+    ;;; and issues responses over STDOUT (TT:)
+    ;;; </summary>
+    public partial class RequestDispatcher extends RoutineDispatcher
+
+        ;;; <summary>
+        ;;; Constructor. Declare custom dispatcher classes.
+        ;;; </summary>
+        public method RequestDispatcher
+        proc
+            mDispatchStubs.Add("AddTwoNumbers",  new AddTwoNumbersDispatcher())
+            mDispatchStubs.Add("GetEnvironment", new GetEnvironmentDispatcher())
+            mDispatchStubs.Add("GetLogicalName", new GetLogicalNameDispatcher())
+        endmethod
+
+    endclass
+
+endnamespace

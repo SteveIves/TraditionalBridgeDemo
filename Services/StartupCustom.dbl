@@ -1,0 +1,154 @@
+;;*****************************************************************************
+;;
+;; Title:       StartupCustom.dbl
+;;
+;; Description: Custom startup class methods
+;;
+;;*****************************************************************************
+;; THIS CODE WAS HAND CRAFTED
+;;*****************************************************************************
+
+import Harmony.AspNetCore.Context
+import Harmony.Core
+import Harmony.Core.Context
+import Harmony.Core.Interface
+import Harmony.Core.FileIO
+import Harmony.Core.Utility
+import Harmony.OData
+import Harmony.OData.Adapter
+
+import Services.Models
+import Services.Controllers
+import Services.Isolated
+
+import Microsoft.AspNetCore.Builder
+import Microsoft.AspNetCore.Hosting
+import Microsoft.AspNetCore.Http
+import Microsoft.AspNet.OData
+import Microsoft.AspNet.OData.Extensions
+import Microsoft.AspNet.OData.Builder
+import Microsoft.AspNet.OData.Routing
+import Microsoft.EntityFrameworkCore
+import Microsoft.Extensions.DependencyInjection
+import Microsoft.Extensions.DependencyInjection.Extensions
+import Microsoft.OData
+import Microsoft.OData.UriParser
+import Swashbuckle.AspNetCore.Swagger
+import Microsoft.AspNetCore.StaticFiles
+import Microsoft.AspNetCore.Mvc.Abstractions
+import System.IO
+import System.Linq
+import System.Threading.Tasks
+import Microsoft.Extensions.Primitives
+
+namespace Services
+
+    public partial class Startup
+
+        ;;; <summary>
+        ;;; The DNS name or TCP/IP address of the server hosting Traditional Bridge services.
+        ;;; </summary>
+        public static readwrite property TraditionalBridgeServer, string
+
+        ;;; <summary>
+        ;;; The username used to access Traditional Bridge services.
+        ;;; </summary>
+        public static readwrite property TraditionalBridgeUser, string
+
+        ;;; <summary>
+        ;;; The password used to access Traditional Bridge services.
+        ;;; </summary>
+        public static readwrite property TraditionalBridgePassword, string
+
+        ;;; <summary>
+        ;;; The command used to initiate a Traditional Bridge host instance.
+        ;;; </summary>
+        public static readwrite property TraditionalBridgeCommand, string
+
+        partial method ConfigureServicesCustom, void
+            services, @IServiceCollection 
+            record
+                targetOs, RemoteTargetOS
+            endrecord
+        proc
+
+            ;---------------------------------------------------------------------------
+            ; Traditional Bridge "out of process" (SSH)
+
+;NOT WORKING
+;            targetOs = RemoteTargetOS.Windows
+;            TraditionalBridgeServer = "LOCALHOST"
+;            TraditionalBridgeUser = "bridge"
+;            TraditionalBridgePassword = "NPMp0tle$AO9h7n9"
+;            TraditionalBridgeCommand = "TraditionalBridgeHost.bat"
+
+;WORKS
+            targetOs = RemoteTargetOS.VMS
+            TraditionalBridgeServer = "SIVMS"
+            TraditionalBridgeUser = "BRIDGE"
+            TraditionalBridgePassword = "BRIDGE"
+            TraditionalBridgeCommand = "RUN TraditionalBridgeHost.exe"
+
+;NOT WORKING
+;            targetOs = RemoteTargetOS.Linux
+;            TraditionalBridgeServer = "SIUBUNTU"
+;            TraditionalBridgeUser = "bridge"
+;            TraditionalBridgePassword = "bridge"
+;            TraditionalBridgeCommand = "dbr TraditionalBridgeHost.dbr"
+;            ;TraditionalBridgeCommand = "dbr -rd 4444:60 TraditionalBridgeHost.dbr"
+
+;            .define CALL_TIMEOUT 100000
+;            .define CONNECTION_TIMEOUT 600000
+;            .define ITEMS_IN_POOL 4
+;
+;            data contextPool, @RemoteExternalContextPool<TraditionalBridgeService>
+;
+;            contextPool = new RemoteExternalContextPool<TraditionalBridgeService>
+;            &    (
+;            &    targetOs,
+;            &    TraditionalBridgeServer,
+;            &    TraditionalBridgeUser,
+;            &    new Renci.SshNet.PasswordAuthenticationMethod(TraditionalBridgeUser,TraditionalBridgePassword),
+;            &    TraditionalBridgeCommand,
+;            &    ITEMS_IN_POOL,
+;            &    CALL_TIMEOUT,
+;            &    CONNECTION_TIMEOUT
+;            &    ) 
+
+            ;---------------------------------------------------------------------------
+            ; Traditional Bridge "in process" (run a local DBR)
+
+;PARTIALLY WORKS!
+;            data contextPool, @ExternalContextPool<TraditionalBridgeService>
+;            data currentDirectory = Path.GetDirectoryName(^typeof(Startup).Assembly.Location)
+;
+;            contextPool = new ExternalContextPool<TraditionalBridgeService>
+;            &    (
+;            &    Environment.GetEnvironmentVariable("SYNERGYDE32") + "dbl\bin\dbs.exe",
+;            &    "TraditionalBridgeHost.dbr",
+;            &    Path.GetFullPath(Path.Combine(currentDirectory, "..\..\..\..\TraditionalBridge\bin\Debug\x86")),
+;            &    ^null,
+;            &    4
+;            &    ) 
+
+            ;---------------------------------------------------------------------------
+            ;
+
+            ;;Add the pool as a service to make it available via Dependency Injection
+            services.AddSingleton<IContextFactory<TraditionalBridgeService>>(contextPool)
+            services.AddContextPool<TraditionalBridgeService>()        
+
+        endmethod
+
+        partial method ConfigureCustom, void
+            required in app, @IApplicationBuilder
+            required in env, @IHostingEnvironment
+        proc
+			
+        endmethod
+
+
+
+    endclass
+
+endnamespace
