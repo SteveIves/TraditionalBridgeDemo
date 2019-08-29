@@ -1,3 +1,11 @@
+;;*****************************************************************************
+;;
+;; Title:       AddTwoNumbers.dbl
+;;
+;; Description: An example routine being exposed by Traditional Bridge.
+;;              Returns the sum of two numbers.
+;;
+;;*****************************************************************************
 
 subroutine AddTwoNumbers
     number1, n
