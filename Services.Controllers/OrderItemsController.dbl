@@ -124,111 +124,32 @@ namespace Services.Controllers
             mreturn Ok(result)
         endmethod
 
-
-
-        {ODataRoute("OrderItems(OrderNumber={aOrderNumber},ItemNumber={aItemNumber})/ItemOrdered")}
+        {ODataRoute("OrderItems")}
         ;;; <summary>
-        ;;; Get the ItemOrdered property of a single OrderItem, by primary key.
+        ;;; Create a new orderItem (automatically assigned primary key).
         ;;; </summary>
-        ;;; <param name="aOrderNumber">Order number</param>
-        ;;; <param name="aItemNumber">Line item number</param>
-        ;;; <returns>
-        ;;; Returns an int containing the value of the requested property.
-        ;;;</returns>
-        public method GetItemOrdered, @IActionResult
-            {FromODataUri}
-            required in aOrderNumber, int
-            {FromODataUri}
-            required in aItemNumber, int
+        ;;; <returns>Returns an IActionResult indicating the status of the operation and containing any data that was returned.</returns>
+        public method PostOrderItem, @IActionResult
+            {FromBody}
+            required in aOrderItem, @OrderItem
         proc
-            data result = DBContext.OrderItems.Find(aOrderNumber,aItemNumber)
-            if (result==^null)
-                mreturn NotFound()
-            mreturn OK(result.ItemOrdered)
-        endmethod
+            ;;Remove the primary key fields from ModelState
+            ModelState.Remove("OrderNumber")
+            ModelState.Remove("ItemNumber")
 
-        {ODataRoute("OrderItems(OrderNumber={aOrderNumber},ItemNumber={aItemNumber})/QuantityOrdered")}
-        ;;; <summary>
-        ;;; Get the QuantityOrdered property of a single OrderItem, by primary key.
-        ;;; </summary>
-        ;;; <param name="aOrderNumber">Order number</param>
-        ;;; <param name="aItemNumber">Line item number</param>
-        ;;; <returns>
-        ;;; Returns an int containing the value of the requested property.
-        ;;;</returns>
-        public method GetQuantityOrdered, @IActionResult
-            {FromODataUri}
-            required in aOrderNumber, int
-            {FromODataUri}
-            required in aItemNumber, int
-        proc
-            data result = DBContext.OrderItems.Find(aOrderNumber,aItemNumber)
-            if (result==^null)
-                mreturn NotFound()
-            mreturn OK(result.QuantityOrdered)
-        endmethod
+            ;; Validate inbound data
+            if (!ModelState.IsValid)
+                mreturn BadRequest(ModelState)
+            disposable data keyFactory = (@IPrimaryKeyFactory)ServiceProvider.GetService(^typeof(IPrimaryKeyFactory))
+            ;;Get the next available primary key value
+            KeyFactory.AssignPrimaryKey(aOrderItem)
 
-        {ODataRoute("OrderItems(OrderNumber={aOrderNumber},ItemNumber={aItemNumber})/UnitPrice")}
-        ;;; <summary>
-        ;;; Get the UnitPrice property of a single OrderItem, by primary key.
-        ;;; </summary>
-        ;;; <param name="aOrderNumber">Order number</param>
-        ;;; <param name="aItemNumber">Line item number</param>
-        ;;; <returns>
-        ;;; Returns a decimal containing the value of the requested property.
-        ;;;</returns>
-        public method GetUnitPrice, @IActionResult
-            {FromODataUri}
-            required in aOrderNumber, int
-            {FromODataUri}
-            required in aItemNumber, int
-        proc
-            data result = DBContext.OrderItems.Find(aOrderNumber,aItemNumber)
-            if (result==^null)
-                mreturn NotFound()
-            mreturn OK(result.UnitPrice)
-        endmethod
+            ;;Add the new orderItem
+            DBContext.OrderItems.Add(aOrderItem)
+            DBContext.SaveChanges(keyFactory)
 
-        {ODataRoute("OrderItems(OrderNumber={aOrderNumber},ItemNumber={aItemNumber})/DateShipped")}
-        ;;; <summary>
-        ;;; Get the DateShipped property of a single OrderItem, by primary key.
-        ;;; </summary>
-        ;;; <param name="aOrderNumber">Order number</param>
-        ;;; <param name="aItemNumber">Line item number</param>
-        ;;; <returns>
-        ;;; Returns a DateTime containing the value of the requested property.
-        ;;;</returns>
-        public method GetDateShipped, @IActionResult
-            {FromODataUri}
-            required in aOrderNumber, int
-            {FromODataUri}
-            required in aItemNumber, int
-        proc
-            data result = DBContext.OrderItems.Find(aOrderNumber,aItemNumber)
-            if (result==^null)
-                mreturn NotFound()
-            mreturn OK(result.DateShipped)
-        endmethod
+            mreturn Created(aOrderItem)
 
-        {ODataRoute("OrderItems(OrderNumber={aOrderNumber},ItemNumber={aItemNumber})/InvoiceNumber")}
-        ;;; <summary>
-        ;;; Get the InvoiceNumber property of a single OrderItem, by primary key.
-        ;;; </summary>
-        ;;; <param name="aOrderNumber">Order number</param>
-        ;;; <param name="aItemNumber">Line item number</param>
-        ;;; <returns>
-        ;;; Returns an int containing the value of the requested property.
-        ;;;</returns>
-        public method GetInvoiceNumber, @IActionResult
-            {FromODataUri}
-            required in aOrderNumber, int
-            {FromODataUri}
-            required in aItemNumber, int
-        proc
-            data result = DBContext.OrderItems.Find(aOrderNumber,aItemNumber)
-            if (result==^null)
-                mreturn NotFound()
-            mreturn OK(result.InvoiceNumber)
         endmethod
 
         {ODataRoute("OrderItems(OrderNumber={aOrderNumber},ItemNumber={aItemNumber})")}

@@ -40,6 +40,7 @@ import System.IO
 import System.Linq
 import System.Threading.Tasks
 import Microsoft.Extensions.Primitives
+import System.Collections.Generic
 
 namespace Services
 
@@ -83,11 +84,11 @@ namespace Services
 ;            TraditionalBridgeCommand = "TraditionalBridgeHost.bat"
 
 ;WORKS
-            targetOs = RemoteTargetOS.VMS
-            TraditionalBridgeServer = "SIVMS"
-            TraditionalBridgeUser = "BRIDGE"
-            TraditionalBridgePassword = "BRIDGE"
-            TraditionalBridgeCommand = "RUN TraditionalBridgeHost.exe"
+;            targetOs = RemoteTargetOS.VMS
+;            TraditionalBridgeServer = "SIVMS"
+;            TraditionalBridgeUser = "BRIDGE"
+;            TraditionalBridgePassword = "BRIDGE"
+;            TraditionalBridgeCommand = "RUN TraditionalBridgeHost.exe"
 
 ;NOT WORKING
 ;            targetOs = RemoteTargetOS.Linux
@@ -119,17 +120,17 @@ namespace Services
             ; Traditional Bridge "in process" (run a local DBR)
 
 ;PARTIALLY WORKS!
-;            data contextPool, @ExternalContextPool<TraditionalBridgeService>
-;            data currentDirectory = Path.GetDirectoryName(^typeof(Startup).Assembly.Location)
-;
-;            contextPool = new ExternalContextPool<TraditionalBridgeService>
-;            &    (
-;            &    Environment.GetEnvironmentVariable("SYNERGYDE32") + "dbl\bin\dbs.exe",
-;            &    "TraditionalBridgeHost.dbr",
-;            &    Path.GetFullPath(Path.Combine(currentDirectory, "..\..\..\..\TraditionalBridge\bin\Debug\x86")),
-;            &    ^null,
-;            &    4
-;            &    ) 
+            data contextPool, @ExternalContextPool<TraditionalBridgeService>
+            data currentDirectory = Path.GetDirectoryName(^typeof(Startup).Assembly.Location)
+
+            contextPool = new ExternalContextPool<TraditionalBridgeService>
+            &    (
+            &    Environment.GetEnvironmentVariable("SYNERGYDE32") + "dbl\bin\dbs.exe",
+            &    "TraditionalBridgeHost.dbr",
+            &    Path.GetFullPath(Path.Combine(currentDirectory, "..\..\..\..\TraditionalBridge\bin\Debug\x86")),
+            &    new Dictionary<string, string>(){{"HARMONY_LOG_LEVEL","6"}},
+            &    4
+            &    ) 
 
             ;---------------------------------------------------------------------------
             ;

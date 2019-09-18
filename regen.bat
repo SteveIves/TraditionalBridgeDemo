@@ -1,7 +1,16 @@
 @echo off
 pushd %~dp0
 setlocal
-set SolutionDir=%~dp0
+
+if not defined RPSMFIL (
+    echo RPSMFIL is not defined!
+    goto error
+)
+
+if not defined RPSTFIL (
+    echo RPSTFIL is not defined!
+    goto error
+)
 
 rem ================================================================================================================================
 rem Specify the names of the projects to generate code into:
@@ -17,7 +26,7 @@ set TraditionalBridgeNamespace=TraditionalBridge
 rem ================================================================================================================================
 rem Specify the names of the repository structures to generate code from:
 
-set DATA_STRUCTURES=
+set DATA_STRUCTURES=CUSTOMERS ITEMS ORDERS ORDER_ITEMS VENDORS
 set DATA_ALIASES=%DATA_STRUCTURES%
 
 set FILE_STRUCTURES=%DATA_STRUCTURES%
@@ -66,27 +75,27 @@ rem Comment or uncomment the following lines to enable or disable optional featu
 
 rem Note that the ENABLE_SWAGGER_DOCS and ENABLE_API_VERSIONING are mutually exclusive.
 
-rem set ENABLE_GET_ALL=-define ENABLE_GET_ALL
-rem set ENABLE_GET_ONE=-define ENABLE_GET_ONE
-rem set ENABLE_SELF_HOST_GENERATION=YES
-rem set ENABLE_CREATE_TEST_FILES=-define ENABLE_CREATE_TEST_FILES
-rem set ENABLE_SWAGGER_DOCS=-define ENABLE_SWAGGER_DOCS
+set ENABLE_GET_ALL=-define ENABLE_GET_ALL
+set ENABLE_GET_ONE=-define ENABLE_GET_ONE
+set ENABLE_SELF_HOST_GENERATION=YES
+set ENABLE_CREATE_TEST_FILES=-define ENABLE_CREATE_TEST_FILES
+set ENABLE_SWAGGER_DOCS=-define ENABLE_SWAGGER_DOCS
 rem set ENABLE_API_VERSIONING=-define ENABLE_API_VERSIONING
-rem set ENABLE_POSTMAN_TESTS=YES
-rem set ENABLE_ALTERNATE_KEYS=-define ENABLE_ALTERNATE_KEYS
+set ENABLE_POSTMAN_TESTS=YES
+set ENABLE_ALTERNATE_KEYS=-define ENABLE_ALTERNATE_KEYS
 rem set ENABLE_COUNT=-define ENABLE_COUNT
 rem set ENABLE_PROPERTY_ENDPOINTS=-define ENABLE_PROPERTY_ENDPOINTS
 rem set ENABLE_PROPERTY_VALUE_DOCS=-define ENABLE_PROPERTY_VALUE_DOCS
-rem set ENABLE_SELECT=-define ENABLE_SELECT
-rem set ENABLE_FILTER=-define ENABLE_FILTER
-rem set ENABLE_ORDERBY=-define ENABLE_ORDERBY
-rem set ENABLE_TOP=-define ENABLE_TOP
+set ENABLE_SELECT=-define ENABLE_SELECT
+set ENABLE_FILTER=-define ENABLE_FILTER
+set ENABLE_ORDERBY=-define ENABLE_ORDERBY
+set ENABLE_TOP=-define ENABLE_TOP
 rem set ENABLE_SKIP=-define ENABLE_SKIP
-rem set ENABLE_RELATIONS=-define ENABLE_RELATIONS
-rem set ENABLE_PUT=-define ENABLE_PUT
-rem set ENABLE_POST=-define ENABLE_POST
-rem set ENABLE_PATCH=-define ENABLE_PATCH
-rem set ENABLE_DELETE=-define ENABLE_DELETE
+set ENABLE_RELATIONS=-define ENABLE_RELATIONS
+set ENABLE_PUT=-define ENABLE_PUT
+set ENABLE_POST=-define ENABLE_POST
+set ENABLE_PATCH=-define ENABLE_PATCH
+set ENABLE_DELETE=-define ENABLE_DELETE
 rem set ENABLE_SPROC=-define ENABLE_SPROC
 rem set ENABLE_ADAPTER_ROUTING=-define ENABLE_ADAPTER_ROUTING
 rem set ENABLE_AUTHENTICATION=-define ENABLE_AUTHENTICATION
@@ -95,7 +104,7 @@ rem set ENABLE_FIELD_SECURITY=-define ENABLE_FIELD_SECURITY
 rem set ENABLE_UNIT_TEST_GENERATION=YES
 rem set ENABLE_CASE_SENSITIVE_URL=-define ENABLE_CASE_SENSITIVE_URL
 rem set ENABLE_CORS=-define ENABLE_CORS
-rem set ENABLE_IIS_SUPPORT=-define ENABLE_IIS_SUPPORT
+set ENABLE_IIS_SUPPORT=-define ENABLE_IIS_SUPPORT
 rem set ENABLE_OVERLAYS=-f o
 rem set ENABLE_ALTERNATE_FIELD_NAMES=-af
 rem set ENABLE_READ_ONLY_PROPERTIES=-define ENABLE_READ_ONLY_PROPERTIES
@@ -108,7 +117,7 @@ if not "NONE%ENABLE_SELECT%%ENABLE_FILTER%%ENABLE_ORDERBY%%ENABLE_TOP%%ENABLE_SK
 rem ================================================================================================================================
 rem Configure standard command line options and the CodeGen environment
 
-set NOREPLACEOPTS=-e -lf -u %SolutionDir%UserDefinedTokens.tkn %ENABLE_GET_ALL% %ENABLE_GET_ONE% %ENABLE_OVERLAYS% %ENABLE_ALTERNATE_FIELD_NAMES% %ENABLE_AUTHENTICATION% %ENABLE_CUSTOM_AUTHENTICATION% %ENABLE_FIELD_SECURITY% %ENABLE_PROPERTY_ENDPOINTS% %ENABLE_PROPERTY_VALUE_DOCS% %ENABLE_CASE_SENSITIVE_URL% %ENABLE_CREATE_TEST_FILES% %ENABLE_CORS% %ENABLE_IIS_SUPPORT% %ENABLE_DELETE% %ENABLE_PUT% %ENABLE_POST% %ENABLE_PATCH% %ENABLE_ALTERNATE_KEYS% %ENABLE_SWAGGER_DOCS% %ENABLE_API_VERSIONING% %ENABLE_RELATIONS% %ENABLE_SELECT% %ENABLE_FILTER% %ENABLE_ORDERBY% %ENABLE_COUNT% %ENABLE_TOP% %ENABLE_SKIP% %ENABLE_SPROC% %ENABLE_ADAPTER_ROUTING% %ENABLE_READ_ONLY_PROPERTIES% %PARAM_OPTIONS_PRESENT% -i %SolutionDir%Templates -rps %RPSMFIL% %RPSTFIL%
+set NOREPLACEOPTS=-e -lf -u UserDefinedTokens.tkn %ENABLE_GET_ALL% %ENABLE_GET_ONE% %ENABLE_OVERLAYS% %ENABLE_ALTERNATE_FIELD_NAMES% %ENABLE_AUTHENTICATION% %ENABLE_CUSTOM_AUTHENTICATION% %ENABLE_FIELD_SECURITY% %ENABLE_PROPERTY_ENDPOINTS% %ENABLE_PROPERTY_VALUE_DOCS% %ENABLE_CASE_SENSITIVE_URL% %ENABLE_CREATE_TEST_FILES% %ENABLE_CORS% %ENABLE_IIS_SUPPORT% %ENABLE_DELETE% %ENABLE_PUT% %ENABLE_POST% %ENABLE_PATCH% %ENABLE_ALTERNATE_KEYS% %ENABLE_SWAGGER_DOCS% %ENABLE_API_VERSIONING% %ENABLE_RELATIONS% %ENABLE_SELECT% %ENABLE_FILTER% %ENABLE_ORDERBY% %ENABLE_COUNT% %ENABLE_TOP% %ENABLE_SKIP% %ENABLE_SPROC% %ENABLE_ADAPTER_ROUTING% %ENABLE_READ_ONLY_PROPERTIES% %PARAM_OPTIONS_PRESENT% -i Templates -rps %RPSMFIL% %RPSTFIL%
 set STDOPTS=%NOREPLACEOPTS% -r
 
 rem ================================================================================================================================
@@ -118,7 +127,7 @@ rem Generate model and metadata classes
 codegen -s %DATA_STRUCTURES% %CUSTOM_STRUCTURES% ^
         -a %DATA_ALIASES% %CUSTOM_ALIASES% ^
         -t ODataModel ODataMetaData ^
-        -o %SolutionDir%%ModelsProject% ^
+        -o %ModelsProject% ^
         -n %ModelsProject% ^
            %STDOPTS%
 if ERRORLEVEL 1 goto error
@@ -127,7 +136,7 @@ rem Generate controller classes
 codegen -s %DATA_STRUCTURES% ^
         -a %DATA_ALIASES% ^
         -t ODataController ^
-        -o %SolutionDir%%ControllersProject% ^
+        -o %ControllersProject% ^
         -n %ControllersProject% ^
            %STDOPTS%
 if ERRORLEVEL 1 goto error
@@ -136,7 +145,7 @@ rem Generate the DbContext class
 codegen -s %DATA_STRUCTURES% -ms ^
         -a %DATA_ALIASES% ^
         -t ODataDbContext ^
-        -o %SolutionDir%%ModelsProject% ^
+        -o %ModelsProject% ^
         -n %ModelsProject% ^
            %STDOPTS%
 if ERRORLEVEL 1 goto error
@@ -145,7 +154,7 @@ rem Generate the EdmBuilder and Startup classes
 codegen -s %DATA_STRUCTURES% -ms ^
         -a %DATA_ALIASES% ^
         -t ODataEdmBuilder ODataStartup ^
-        -o %SolutionDir%%ServicesProject% ^
+        -o %ServicesProject% ^
         -n %ServicesProject% ^
         -ut CONTROLLERS_NAMESPACE=%ControllersProject% MODELS_NAMESPACE=%ModelsProject% ^
            %STDOPTS%
@@ -158,7 +167,7 @@ if DEFINED ENABLE_SELF_HOST_GENERATION (
   codegen -s %FILE_STRUCTURES% %PARAMSTR% -ms ^
           -a %FILE_ALIASES% ^
           -t ODataSelfHost ODataSelfHostEnvironment ^
-          -o %SolutionDir%%HostProject% ^
+          -o %HostProject% ^
           -n %HostProject% ^
              %STDOPTS%
   if ERRORLEVEL 1 goto error
@@ -172,14 +181,14 @@ if DEFINED ENABLE_SWAGGER_DOCS (
   codegen -s %DATA_STRUCTURES% -ms ^
           -a %DATA_ALIASES% ^
           -t ODataSwaggerYaml ^
-          -o %SolutionDir%%ServicesProject%\wwwroot ^
+          -o %ServicesProject%\wwwroot ^
              %STDOPTS%
   if ERRORLEVEL 1 goto error
 
   codegen -s %DATA_STRUCTURES% ^
           -a %DATA_ALIASES% ^
           -t ODataSwaggerType ^
-          -o %SolutionDir%%ServicesProject%\wwwroot ^
+          -o %ServicesProject%\wwwroot ^
              %STDOPTS%
   if ERRORLEVEL 1 goto error
 )
@@ -189,7 +198,7 @@ if DEFINED ENABLE_POSTMAN_TESTS (
   codegen -s %DATA_STRUCTURES% -ms ^
           -a %DATA_ALIASES% ^
           -t ODataPostManTests ^
-          -o %SolutionDir% ^
+          -o . ^
              %STDOPTS%
   if ERRORLEVEL 1 goto error
 )
@@ -203,7 +212,7 @@ if DEFINED ENABLE_UNIT_TEST_GENERATION (
   codegen -s %DATA_STRUCTURES% ^
           -a %DATA_ALIASES% ^
           -t ODataClientModel ODataTestDataLoader ODataUnitTests ^
-          -o %SolutionDir%%TestProject% -tf ^
+          -o %TestProject% -tf ^
           -n %TestProject% ^
              %STDOPTS%
   if ERRORLEVEL 1 goto error
@@ -212,7 +221,7 @@ if DEFINED ENABLE_UNIT_TEST_GENERATION (
   codegen -s %FILE_STRUCTURES% %PARAMSTR% -ms ^
           -a %FILE_ALIASES% ^
           -t ODataTestEnvironment ^
-          -o %SolutionDir%%TestProject% ^
+          -o %TestProject% ^
           -n %TestProject% ^
              %STDOPTS%
   if ERRORLEVEL 1 goto error
@@ -221,7 +230,7 @@ if DEFINED ENABLE_UNIT_TEST_GENERATION (
   codegen -s %FILE_STRUCTURES% -ms ^
           -a %FILE_ALIASES% ^
           -t ODataUnitTestEnvironment ODataUnitTestHost ^
-          -o %SolutionDir%%TestProject% ^
+          -o %TestProject% ^
           -n %TestProject% ^
              %STDOPTS%
   if ERRORLEVEL 1 goto error
@@ -230,7 +239,7 @@ if DEFINED ENABLE_UNIT_TEST_GENERATION (
   codegen -s %DATA_STRUCTURES% -ms ^
           -a %DATA_ALIASES% ^
           -t ODataTestConstantsProperties ^
-          -o %SolutionDir%%TestProject% ^
+          -o %TestProject% ^
           -n %TestProject% ^
              %STDOPTS%
   if ERRORLEVEL 1 goto error
@@ -239,7 +248,7 @@ if DEFINED ENABLE_UNIT_TEST_GENERATION (
   codegen -s %DATA_STRUCTURES% -ms ^
           -a %DATA_ALIASES% ^
           -t ODataTestConstantsValues ^
-          -o %SolutionDir%%TestProject% ^
+          -o %TestProject% ^
           -n %TestProject% ^
              %NOREPLACEOPTS%
   if ERRORLEVEL 1 goto error
@@ -255,7 +264,7 @@ if ENABLE_TRADITIONAL_BRIDGE_GENERATION (
   codegen -s %BRIDGE_STRUCTURES% ^
           -a %BRIDGE_ALIASES% ^
           -t ODataModel ^
-          -o %SolutionDir%%TraditionalBridgeProject%\source ^
+          -o %TraditionalBridgeProject%\source ^
           -n %TraditionalBridgeNamespace% ^
           -e -r -lf
   if ERRORLEVEL 1 goto error

@@ -57,7 +57,7 @@ namespace TraditionalBridge.Dispatchers
             ;;Process outbound return value and parameters
 
             ;;Argument 3 is the returned
-            serializer.ArgumentData(3,arg3,FieldDataType.ImpliedDecimal,28,10,false)
+            serializer.ArgumentData(3,arg3,FieldDataType.ImpliedDecimal,56,28,false)
 
         endmethod
 
